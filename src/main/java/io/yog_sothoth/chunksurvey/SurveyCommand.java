@@ -2,6 +2,8 @@ package io.yog_sothoth.chunksurvey;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.tree.LiteralCommandNode;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.command.CommandSource;
@@ -20,7 +22,7 @@ public class SurveyCommand {
 	private static final int MAX_RADIUS = 9;
 	
 	public static void register(CommandDispatcher<CommandSource> dispatcher) {
-		dispatcher.register(Commands.literal("survey").requires(source->source.hasPermissionLevel(2))
+		LiteralCommandNode<CommandSource> rootNode = dispatcher.register(Commands.literal("survey").requires(source->source.hasPermissionLevel(2))
 			//survey <block> <radius>
 			.then(Commands.argument("block", BlockStateArgument.blockState())
 			.then(Commands.argument("radius", IntegerArgumentType.integer(0, MAX_RADIUS))
@@ -44,6 +46,7 @@ public class SurveyCommand {
 				return SurveyChunk(ctx.getSource(), targetChunkPos, BlockStateArgument.getBlockState(ctx, "block"), IntegerArgumentType.getInteger(ctx, "radius"));
 			})))))
 		);
+		dispatcher.register(LiteralArgumentBuilder.<CommandSource>literal("s").redirect(rootNode));
 	}
 	
 	private static int SurveyChunk(CommandSource source, Entity target, BlockStateInput blockInput, int radius) {
